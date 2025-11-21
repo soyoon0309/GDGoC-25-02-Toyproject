@@ -18,7 +18,16 @@
                 <!--블로그 글 id 추가-->
                 <input type="hidden" id="article-id" th:value="${article.id}">
                 <header class="mb-4">
+                    <div class="d-flex justify-content-between align-items-center">
                     <h1 class="fw-bolder mb-1" th:text="${article.title}"></h1>
+
+                    <div class="like-info d-flex align-itmes-center">
+                        <span id="like-count" class="mr-2 h5 mb-0">
+                           <span th:text="${article.likeCount}">0</span>
+                           <span id="like-icon">❤️</span>
+                        </span>
+                        </div>
+                    </div>
                     <div class="text-muted fst-italic mb-2" th:text="|Posted on ${#temporals.format(article.createdAt, 'yyyy-MM-dd HH:mm')} By ${article.author}|"></div>
                 </header>
                 <section class="mb-5">
@@ -33,6 +42,8 @@
                 <!--삭제 버튼에 id 추가-->
                 <button type="button" id="delete-btn"
                         class="btn btn-secondary btn-sm">삭제</button>
+                <!-- 좋아요 버튼 추가-->
+                <button type="button" id="like-btn" class="btn btn-sm">좋아요</button>
             </article>
         </div>
     </div>

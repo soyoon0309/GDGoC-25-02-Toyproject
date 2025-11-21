@@ -41,17 +41,34 @@ public class Article {
     @Column(name="updated_at")
     private LocalDateTime updateAt;
 
+    //like_count 필드 추가(좋아요 개수)
+    @Column(name="like_count",nullable = false) 
+    private Integer likeCount=0;  //좋아요 개수 0으로 초기화
+
     @Builder //빌더 패턴으로 객체 생성
     public Article(String author,String title, String content) {
         this.author = author;
         this.title = title;
         this.content = content;
+        this.likeCount=0;
+
     }
 
     public void update(String title, String content) {
         this.title = title;
         this.content = content;
 
+    }
+    //좋아요 수 1 감소
+    public void decreaseLikeCount() {
+        if(likeCount>0) {
+            this.likeCount--;
+        }
+    }
+    //좋아요 수 1 증가
+    public void increaseLikeCount() {
+
+        this.likeCount++;
     }
 
 }

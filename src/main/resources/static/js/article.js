@@ -67,7 +67,54 @@ if (createButton) {
         httpRequest('POST','/api/articles', body, success, fail)
     });
 }
+//좋아요 기능
+const likebutton=document.getElementById("like-btn");
+if(likebutton){
+    likebutton.addEventListener('click',likeArticle);
+}
+function likeArticle(){
+    const articleId=document.getElementById('article-id').value;
+    const url=`/api/articles/${articleId}/like`;
 
+    // 현재 좋아요 개수와 아이콘 요소
+    const likeCountSpanElement = document.getElementById('like-count');
+    const likeCountElement = likeCountSpanElement.querySelector('span'); // 개수 숫자 자체
+    const likeIconElement = document.getElementById('like-icon'); // 하트 아이콘
+
+    function success(response) {
+        // 서버에서 반환된 boolean 값 (true: 좋아요 됨, false: 좋아요 취소)을 JSON 파싱해야 함
+        // *주의*: httpRequest 함수가 response.json()을 바로 반환하도록 수정해야 함 (아래 참고)
+        // 여기서는 response가 이미 파싱된 JSON 객체라고 가정하고 로직 작성
+
+        let isLiked = response; // response 자체가 boolean 값이라고 가정
+        let currentCount = parseInt(likeCountElement.textContent, 10);
+
+        if (isLiked) {
+            // 좋아요 추가
+            likeCountElement.textContent = currentCount + 1;
+            likeIconElement.textContent = '❤️'; // 채워진 하트
+            alert('좋아요 완료!');
+        } else {
+            // 좋아요 취소
+            likeCountElement.textContent = currentCount - 1;
+            likeIconElement.textContent = '🤍'; // 비워진 하트
+            alert('좋아요 취소!');
+        }
+    }
+
+    function fail(status) {
+        if (status === 401) {
+            alert('로그인이 필요합니다.');
+        } else {
+            alert('좋아요 처리 중 오류가 발생했습니다.');
+        }
+    }
+
+    // 좋아요 API는 POST 요청을 보냅니다.
+    // 좋아요 API는 요청 본문(body)이 필요하지 않습니다 (null).
+    httpRequest('POST', url, null, success, fail);
+
+}
 
 // 로그아웃 기능
 const logoutButton = document.getElementById('logout-btn');
@@ -127,7 +174,12 @@ function httpRequest(method, url, body, success, fail) {
         body: body,
     }).then(response => {
         if (response.status === 200 || response.status === 201) {
-            return success();
+            //좋아요 기능을 위해 서버가 반환한 isLike값을 받으려면, 서버에서 반환한 true/false값을 success 콜백 함수로 전달해야 함
+            if (response.headers.get('content-length') !== '0') {
+                return response.json().then(data => success(data));
+            }
+            // 응답 본문이 비어있다면 (주로 DELETE) null을 전달
+            return success(null);
         }
         const refresh_token = getCookie('refresh_token');
         if (response.status === 401 && refresh_token) {
@@ -150,9 +202,9 @@ function httpRequest(method, url, body, success, fail) {
                     localStorage.setItem('access_token', result.accessToken);
                     httpRequest(method, url, body, success, fail);
                 })
-                .catch(error => fail());
+                .catch(error => fail(response.status));
         } else {
-            return fail();
+            return fail(response.status);
         }
     });
 }
