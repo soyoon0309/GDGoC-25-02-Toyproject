@@ -15,6 +15,7 @@ public class ArticleViewResponse {
     private String content;
     private LocalDateTime createdAt;
     private String author;
+    private Integer likeCount;
 
     public ArticleViewResponse(Article article) {
         this.id = article.getId();
@@ -22,5 +23,6 @@ public class ArticleViewResponse {
         this.content = article.getContent();
         this.createdAt=article.getCreateAt();
         this.author=article.getAuthor();
+        this.likeCount=article.getLikeCount();
     }
 }

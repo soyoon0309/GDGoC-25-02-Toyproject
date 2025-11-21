@@ -9,6 +9,7 @@ public class ArticleResponse {
     private final String title;
     private final String content;
 
+
     public ArticleResponse(Article article) {
         this.title = article.getTitle(); //article에서 title과 content를 받아서 저장
         this.content = article.getContent();

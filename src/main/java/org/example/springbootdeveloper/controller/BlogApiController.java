@@ -2,6 +2,7 @@ package org.example.springbootdeveloper.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.example.springbootdeveloper.domain.Article;
+import org.example.springbootdeveloper.domain.ArticleLike;
 import org.example.springbootdeveloper.dto.AddArticleRequest;
 import org.example.springbootdeveloper.dto.ArticleResponse;
 import org.example.springbootdeveloper.dto.UpdateArticleRequest;
@@ -55,5 +56,16 @@ public class BlogApiController {
         return ResponseEntity.ok()
                 .body(updatedArticle);
     }
+
+    @PostMapping("/api/articles/{id}/like")
+    public ResponseEntity<Boolean> likeArticle(@PathVariable Long id,Principal principal) {
+        //id: 게시글 ID
+        //principal.getName(): 로그인한 유저의 이메일
+        boolean isLiked= blogService.toggleLike(id, principal.getName());
+        return ResponseEntity.ok(isLiked);
+
+    }
+
+
 
 }
