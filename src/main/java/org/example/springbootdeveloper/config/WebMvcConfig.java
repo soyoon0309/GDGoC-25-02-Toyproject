@@ -10,7 +10,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         // 웹 브라우저 URL '/img/**' 요청을 로컬 'uploads' 폴더로 매핑
-        registry.addResourceHandler("/img/**")
+        registry.addResourceHandler("/upload/**")
                 .addResourceLocations("file:///" + System.getProperty("user.dir") + "/imgfiles/");
     }
 }
