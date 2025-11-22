@@ -42,7 +42,7 @@ public class ImageFileService {
 
             // 저장된 경로(또는 파일명) 반환
             // 배포를 위해 AWS S3 사용 시 "https://s3..." URL을 반환하도록 수정 예정
-            return filePath;
+            return "/img/" + savedFileName;
 
         } catch (IOException e) {
             // 파일 저장 중 에러 발생 시 예외 처리
