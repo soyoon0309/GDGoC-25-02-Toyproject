@@ -15,16 +15,22 @@
     <div class="row">
         <div class="col-lg-8">
             <article>
-                <input type="hidden" id="article-id" th:value="${article.id}">
+                <form id="article-form" enctype="multipart/form-data">
+                    <input type="hidden" id="article-id" th:value="${article.id}">
 
-                <header class="mb-4">
-                    <input type="text" class="form-control" placeholder="제목" id="title" th:value="${article.title}">
-                </header>
-                <section class="mb-5">
-                    <textarea class="form-control h-25" rows="10" placeholder="내용" id="content" th:text="${article.content}"></textarea>
-                </section>
-                <button th:if="${article.id} != null" type="button" id="modify-btn" class="btn btn-primary btn-sm">수정</button>
-                <button th:if="${article.id} == null" type="button" id="create-btn" class="btn btn-primary btn-sm">등록</button>
+                    <header class="mb-4">
+                        <input type="text" class="form-control" placeholder="제목" id="title" th:value="${article.title}">
+                    </header>
+                    <section class="mb-5">
+                        <textarea class="form-control h-25" rows="10" placeholder="내용" id="content" th:text="${article.content}"></textarea>
+                    </section>
+                    <div class="mb-6">
+                        <label for="files">이미지 업로드</label>
+                        <input type="file" id="files" class="form control" multiple>
+                    </div>
+                    <button th:if="${article.id} != null" type="button" id="modify-btn" class="btn btn-primary btn-sm">수정</button>
+                    <button th:if="${article.id} == null" type="button" id="create-btn" class="btn btn-primary btn-sm">등록</button>
+                </form>
             </article>
         </div>
     </div>
