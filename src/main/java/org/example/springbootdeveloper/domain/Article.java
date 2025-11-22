@@ -10,6 +10,8 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 
 @EntityListeners(AuditingEntityListener.class)
@@ -45,13 +47,19 @@ public class Article {
     @Column(name="like_count",nullable = false) 
     private Integer likeCount=0;  //좋아요 개수 0으로 초기화
 
+    // mappedBy="article": Image 클래스의 'article' 필드가 관계의 주인임을 표시
+    // CascadeType.ALL: 게시글 지우면 이미지도 삭제
+    // orphanRemoval=true: 리스트에서 이미지를 제거하면 DB에서도 삭제
+    @OneToMany(mappedBy = "article", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Image> images = new ArrayList<>(); // NullPointerException 방지 초기화
+
     @Builder //빌더 패턴으로 객체 생성
     public Article(String author,String title, String content) {
         this.author = author;
         this.title = title;
         this.content = content;
         this.likeCount=0;
-
+        //image list는 위에서 초기화 했으므로 추가 안해도 괜찮음
     }
 
     public void update(String title, String content) {
@@ -70,5 +78,8 @@ public class Article {
 
         this.likeCount++;
     }
-
+    // 이미지를 추가할 때, 양방향 관계를 안전하게 맺어주는 메서드
+    public void addImage(Image image) {
+        this.images.add(image);
+    }
 }

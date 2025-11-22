@@ -4,14 +4,17 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.example.springbootdeveloper.domain.Article;
 import org.example.springbootdeveloper.domain.ArticleLike;
+import org.example.springbootdeveloper.domain.Image;
 import org.example.springbootdeveloper.domain.User;
 import org.example.springbootdeveloper.dto.AddArticleRequest;
 import org.example.springbootdeveloper.dto.UpdateArticleRequest;
 import org.example.springbootdeveloper.repository.ArticleLikeRepository;
 import org.example.springbootdeveloper.repository.BlogRepository;
+import org.example.springbootdeveloper.repository.ImageRepository;
 import org.example.springbootdeveloper.repository.UserRepository;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Optional;
@@ -24,12 +27,46 @@ public class BlogService {
     //해당 블로그에 좋아요가 눌러져있는지 확인
     private final UserRepository userRepository;
     private final ArticleLikeRepository articleLikeRepository;
-    //블로그 글 추가 메서드
-    //sav()는 JpaRepository에서 지원하는 저장 메서드로
-    //AddArticleRequest 클래스에 저장된 값들은 article 데이터베이스에 저장
-    public Article save(AddArticleRequest request, String userName) {
-        return blogRepository.save(request.toEntity(userName));
 
+    //image 처리에 필요
+    private final ImageFileService imageFileService;
+    private final ImageRepository imageRepository;
+
+    //블로그 글 추가 메서드
+    //save()는 JpaRepository에서 지원하는 저장 메서드로
+    //AddArticleRequest 클래스에 저장된 값들은 article 데이터베이스에 저장
+    public Article save(AddArticleRequest request, String userName, List<MultipartFile> files) {
+        //Article id 생성을 위해 미리 article 저장
+        Article savedArticle =  blogRepository.save(request.toEntity(userName));
+        //image file이 존재할 경우 처리
+        if (files != null && !files.isEmpty()) {    //저장된 file이 하나도 없던 경우
+            int order = 1;  //uploadOrder 초기값 1로 설정
+
+            for (MultipartFile file : files) {
+                //empty file일 경우 건너뛰기
+                if (file.isEmpty())
+                    continue;
+
+                //empty가 아닌 경우
+                String imgFileUrl = imageFileService.upload(file);
+
+                //upload 실패 시 우선 null 처리
+                if (imgFileUrl == null)
+                    continue;
+
+                //image Entity 생성
+                Image image = Image.builder()
+                        .article(savedArticle)
+                        .url(imgFileUrl)
+                        .originalFileName(file.getOriginalFilename())
+                        .uploadOrder(order++)   //1 부터 시작해서 여러 개 저장할 때 마다 ++
+                        .build();
+
+                //image entity DB save
+                imageRepository.save(image);
+            }
+        }
+        return savedArticle;
     }
 
     //블로그의 내용을 불러오는 api 작성
