@@ -32,6 +32,11 @@
                 </header>
                 <section class="mb-5">
                     <p class="fs-5 mb-4" th:text="${article.content}"></p>
+                    <!--image 표시-->
+                    <div th:each="imageUrl : ${article.imageUrls}" class="mb-3">
+                        <!-- th:src에 이미지 URL 변수 할당 -->
+                        <img th:src="${imageUrl}" class="img-fluid" alt="게시글 이미지">
+                    </div>
                 </section>
 
 
