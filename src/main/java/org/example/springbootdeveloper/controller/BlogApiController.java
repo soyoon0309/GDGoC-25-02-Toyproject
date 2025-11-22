@@ -24,7 +24,7 @@ public class BlogApiController {
     public ResponseEntity<Article> addArticle(
             @RequestPart("request") AddArticleRequest request,
             Principal principal,
-            @RequestPart("images") List<MultipartFile> images) {
+            @RequestPart(value = "images", required = false) List<MultipartFile> images) {
         Article savedArticle = blogService.save(request, principal.getName(), images);
 
         //요청한 자원이 성공적으로 생성되었으면 저장된 블로그 글 정보를 응답 객체에 담아 전송
