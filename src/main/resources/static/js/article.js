@@ -51,20 +51,41 @@ const createButton = document.getElementById('create-btn');
 if (createButton) {
     // 등록 버튼을 클릭하면 /api/articles로 요청을 보낸다
     createButton.addEventListener('click', event => {
-        body = JSON.stringify({
+        // formData 생성
+        const formData = new FormData();
+
+        // articleData 생성 (JSON data)
+        const articleData = {
             title: document.getElementById('title').value,
             content: document.getElementById('content').value
-        });
+        };
+
+        // JSON을 Blob으로 변환하여 'request' 파트에 추가
+        // Controller의 @RequestPart("request")가 이를 인식함
+        formData.append('request', new Blob([JSON.stringify(articleData)], {
+            type: 'application/json'
+        }));
+
+        // image file data 추가
+        const imgInput = document.getElementById('files');
+        if (imgInput && imgInput.files) {
+            // Controller의 @RequestPart("images")가 이를 인식함
+            for (let i = 0; i < imgInput.files.length; i++) {
+                formData.append('images', imgInput.files[i]);
+            }
+        }
+
         function success() {
             alert('등록 완료되었습니다.');
             location.replace('/articles');
         };
+
         function fail() {
             alert('등록 실패했습니다.');
             location.replace('/articles');
         };
 
-        httpRequest('POST','/api/articles', body, success, fail)
+        httpRequest('POST','/api/articles', formData, success, fail)
     });
 }
 //좋아요 기능
@@ -111,9 +132,7 @@ function likeArticle(){
     }
 
     // 좋아요 API는 POST 요청을 보냅니다.
-    // 좋아요 API는 요청 본문(body)이 필요하지 않습니다 (null).
     httpRequest('POST', url, null, success, fail);
-
 }
 
 // 로그아웃 기능
@@ -136,8 +155,6 @@ if (logoutButton) {
         httpRequest('DELETE','/api/refresh-token', null, success, fail);
     });
 }
-
-
 
 // 쿠키를 가져오는 함수
 function getCookie(key) {
@@ -165,20 +182,30 @@ function deleteCookie(name) {
 
 // HTTP 요청을 보내는 함수
 function httpRequest(method, url, body, success, fail) {
+    // 헤더 설정
+    const headers = {
+        Authorization: 'Bearer ' + localStorage.getItem('access_token'),
+    };
+
+    // FormData가 아닐 때만 application/json 헤더를 설정
+    // FormData는 브라우저가 자동으로 boundary를 포함한 Content-Type을 설정함
+    if (body && !(body instanceof FormData)) {
+        headers['Content-Type'] = 'application/json';
+    }
+
     fetch(url, {
         method: method,
-        headers: { // 로컬 스토리지에서 액세스 토큰 값을 가져와 헤더에 추가
-            Authorization: 'Bearer ' + localStorage.getItem('access_token'),
-            'Content-Type': 'application/json',
-        },
+        headers: headers,
         body: body,
     }).then(response => {
         if (response.status === 200 || response.status === 201) {
-            //좋아요 기능을 위해 서버가 반환한 isLike값을 받으려면, 서버에서 반환한 true/false값을 success 콜백 함수로 전달해야 함
-            if (response.headers.get('content-length') !== '0') {
+            // 좋아요 기능을 위해 서버가 반환한 값을 success 콜백으로 전달
+            // 응답 본문이 있는 경우 JSON 파싱
+            const contentType = response.headers.get("content-type");
+            if (contentType && contentType.indexOf("application/json") !== -1) {
                 return response.json().then(data => success(data));
             }
-            // 응답 본문이 비어있다면 (주로 DELETE) null을 전달
+            // 본문이 없거나 JSON이 아닌 경우
             return success(null);
         }
         const refresh_token = getCookie('refresh_token');
