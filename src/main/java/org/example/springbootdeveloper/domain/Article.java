@@ -51,6 +51,7 @@ public class Article {
     // CascadeType.ALL: 게시글 지우면 이미지도 삭제
     // orphanRemoval=true: 리스트에서 이미지를 제거하면 DB에서도 삭제
     @OneToMany(mappedBy = "article", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("uploadOrder ASC") // [수정됨] 이미지 조회 시 uploadOrder 기준으로 오름차순 정렬
     private List<Image> images = new ArrayList<>(); // NullPointerException 방지 초기화
 
     @Builder //빌더 패턴으로 객체 생성

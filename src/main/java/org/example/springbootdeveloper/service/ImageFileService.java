@@ -50,4 +50,15 @@ public class ImageFileService {
             return null;
         }
     }
+
+    // [추가됨] 이미지 파일 삭제 메서드
+    public void deleteImage(String filePath) {
+        // DB에 저장된 경로는 "/upload/파일명" 형식이므로, "/upload/"를 제거하여 실제 파일명을 추출
+        String fileName = filePath.replace("/upload/", "");
+
+        File file = new File(fileDir + fileName);
+        if (file.exists()) {
+            file.delete(); // 파일 삭제
+        }
+    }
 }

@@ -81,11 +81,16 @@ public class BlogService {
     }
 
 
-
+    @Transactional // 이미지 리스트 지연 로딩을 위해 트랜잭션 필요
     public void delete(long id) {
         Article article = blogRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("no found:" + id));
         authorizeArticleAuthor(article);
+        //연동된 이미지들도 함께 삭제
+        List<Image> images = article.getImages();
+        for (Image image : images) {
+            imageFileService.deleteImage(image.getUrl());
+        }
         //삭제하기 전 인증 객체에 담겨있는 사용자의 정보와 글을 작성한 사용자의 정보 비교
         blogRepository.delete(article);
     }
